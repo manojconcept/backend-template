@@ -2,7 +2,6 @@ import UserModel from "../models/Users.js";
 import sendMail from "../config/email.js";
 import { genJwtToken, jwtVerifier } from "../config/authentication.js";
 
-// Sign Up
 export const signup = async (req, res) => {
     const { email, username, password, phone } = req.body;
     try {
@@ -10,16 +9,13 @@ export const signup = async (req, res) => {
         const existingUserName = await UserModel.findOne({ username });
         if (existingUser) return res.status(400).json({ message: 'User already exists' });
         if (existingUserName) return res.status(400).json({ message: 'Username already exists' });
-
         const newUser = new UserModel({ email, username, password, phone });
         const savedUser = await newUser.save();
-        // Generate a verification token
         const verificationToken = genJwtToken({ id: savedUser._id });
         savedUser.verificationToken = verificationToken;
         savedUser.verificationTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
         await savedUser.save();
 
-        // Send verification email
         const verificationUrl = `http://localhost:3300/auth/verify/${verificationToken}`;
         await sendMail({
             to: email,
@@ -32,7 +28,6 @@ export const signup = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Email Verification
 export const verifyEmail = async (req, res) => {
     const { token } = req.params;
@@ -55,7 +50,6 @@ export const verifyEmail = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Login
 export const login = async (req, res) => {
     const { email, password } = req.body;
@@ -109,7 +103,6 @@ export const login = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Request Password Reset
 export const requestPasswordReset = async (req, res) => {
     const { email } = req.body;
@@ -137,7 +130,6 @@ export const requestPasswordReset = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Reset Password
 export const resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
@@ -160,7 +152,6 @@ export const resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Refresh Token
 export const refreshToken = async (req, res) => {
     const { token } = req.body;
@@ -190,7 +181,6 @@ export const refreshToken = async (req, res) => {
         res.sendStatus(403).json({ message: 'Invalid or expired refresh token', error });
     }
 };
-
 // Logout Endpoint
 export const logout = async (req, res) => {
     const { token } = req.body;

@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
             lowercase: true, // Normalizes email to lowercase
             validate: {
                 validator: function(v) {
-                    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v); // Simple email regex validation
+                    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v);
                 },
                 message: props => `${props.value} is not a valid email address!`
             }
@@ -36,6 +36,8 @@ const userSchema = new mongoose.Schema(
             trim: true 
         },
         deleted: { type: Boolean, default: false },
+        deletedUser:{type:String,defualt:undefined},
+        deletedtimestamp:{type:String,default:undefined},
         isVerified: { type: Boolean, default: false },
         avatar: { type: String },
         role: { 
@@ -51,22 +53,23 @@ const userSchema = new mongoose.Schema(
         resetTokenExpiry: { type: Date },
     }, 
     {
-        timestamps: true // Automatically adds createdAt and updatedAt fields
+        timestamps: true
     }
 );
 
-// Pre-save hook to hash password before saving
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
     this.password = await genHashedPassword(this.password);
     next();
 });
 
-// Method to compare password
 userSchema.methods.comparePassword = function (password) {
     return compareHasedPassword(password, this.password);
 };
 
-// Create and export the user model
+// userSchema.methods.deletedTimeStamp = async function(){
+//     this.deletedtimestamp = new Date().toISOString();
+//     await this.save();
+// }
 const UserModel = mongoose.model("User", userSchema);
 export default UserModel;
