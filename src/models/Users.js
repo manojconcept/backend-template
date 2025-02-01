@@ -41,11 +41,6 @@ const userSchema = new mongoose.Schema
             default: "user", 
             enum: ["user", "admin"] 
         },
-        // refreshToken: { type: String },
-        // verificationToken: { type: String },
-        // verificationTokenExpiry: { type: Date },
-        // resetToken: { type: String },
-        // resetTokenExpiry: { type: Date },
     }, 
     {
         timestamps: true

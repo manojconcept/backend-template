@@ -30,10 +30,9 @@ export const jwtVerifier = (token, SECRET_KEY = ACCESS_TOKEN_SECRET_KEY) => jwt.
 export const jwtDecoder = token => jwt.decode(token);
 export function isJWTExpired(token, SECRET_KEY) {
     try {
-        const jwtv = jwtVerifier(token, SECRET_KEY);
         return {
             status: false,
-            ...jwtv
+            ...jwtVerifier(token, SECRET_KEY)
         };
     } catch (e) {
         if (e.name === "TokenExpiredError") {

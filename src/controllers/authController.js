@@ -103,6 +103,31 @@ export const login = async (req, res) => {
         res.status(500).json({ message: 'Server '+error });
     }
 };
+export const refreshToken = async (req, res) => {
+    const { token } = req.body;
+    if (!token) return res.status(401).json({ message: 'Refresh token required' });
+    try {
+        const decoded = jwtVerifier(token, process.env.REFRESH_TOKEN_SECRET_KEY);
+        const user = await UserModel.findById(decoded.id);
+        if (!user) return res.sendStatus(403).json({ status: false, message: 'Invalid refresh token' });
+        if (user.refreshToken !== token) {
+            return res.status(403).json({ status: false, message: 'Invalid refresh token' });
+        }
+        const accessToken = genJwtToken({ id: user._id });
+
+        const newRefreshToken = genJwtToken(
+            { id: user._id },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
+            process.env.JWT_REFRESH_TOKEN_LIFE
+        );
+        user.refreshToken = newRefreshToken;
+        await user.save();
+
+        res.status(200).json({ status: true, accessToken, refreshToken: newRefreshToken });
+    } catch (error) {
+        res.sendStatus(403).json({ message: 'Invalid or expired refresh token', error });
+    }
+};
 export const requestPasswordReset = async (req, res) => {
     const { email } = req.body;
     try {
@@ -141,31 +166,6 @@ export const resetPassword = async (req, res) => {
         res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
-    }
-};
-export const refreshToken = async (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(401).json({ message: 'Refresh token required' });
-    try {
-        const decoded = jwtVerifier(token, process.env.REFRESH_TOKEN_SECRET_KEY);
-        const user = await UserModel.findById(decoded.id);
-        if (!user) return res.sendStatus(403).json({ status: false, message: 'Invalid refresh token' });
-        if (user.refreshToken !== token) {
-            return res.status(403).json({ status: false, message: 'Invalid refresh token' });
-        }
-        const accessToken = genJwtToken({ id: user._id });
-
-        const newRefreshToken = genJwtToken(
-            { id: user._id },
-            process.env.REFRESH_TOKEN_SECRET_KEY,
-            process.env.JWT_REFRESH_TOKEN_LIFE
-        );
-        user.refreshToken = newRefreshToken;
-        await user.save();
-
-        res.status(200).json({ status: true, accessToken, refreshToken: newRefreshToken });
-    } catch (error) {
-        res.sendStatus(403).json({ message: 'Invalid or expired refresh token', error });
     }
 };
 export const logout = async (req, res) => {
