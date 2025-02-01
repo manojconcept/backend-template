@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
 import { genHashedPassword, compareHasedPassword } from "../config/authentication.js";
 
-// User Schema
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema
+(
     {
         email: { 
             type: String, 
             required: [true, 'Email is required'], 
             unique: true, 
-            trim: true, // Trims whitespace
-            lowercase: true, // Normalizes email to lowercase
+            trim: true, 
+            lowercase: true, 
             validate: {
                 validator: function(v) {
                     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v);
@@ -25,14 +25,9 @@ const userSchema = new mongoose.Schema(
             minlength: [3, 'Username must be at least 3 characters long'],
             maxlength: [30, 'Username cannot exceed 30 characters']
         },
-        password: { 
-            type: String, 
-            required: [true, 'Password is required'], 
-            minlength: [6, 'Password must be at least 6 characters long']
-        },
         phone: { 
             type: String, 
-            required: [true, 'Phone number is required'], 
+            unique:true,
             trim: true 
         },
         deleted: { type: Boolean, default: false },
@@ -46,30 +41,16 @@ const userSchema = new mongoose.Schema(
             default: "user", 
             enum: ["user", "admin"] 
         },
-        refreshToken: { type: String },
-        verificationToken: { type: String },
-        verificationTokenExpiry: { type: Date },
-        resetToken: { type: String },
-        resetTokenExpiry: { type: Date },
+        // refreshToken: { type: String },
+        // verificationToken: { type: String },
+        // verificationTokenExpiry: { type: Date },
+        // resetToken: { type: String },
+        // resetTokenExpiry: { type: Date },
     }, 
     {
         timestamps: true
     }
 );
 
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    this.password = await genHashedPassword(this.password);
-    next();
-});
-
-userSchema.methods.comparePassword = function (password) {
-    return compareHasedPassword(password, this.password);
-};
-
-// userSchema.methods.deletedTimeStamp = async function(){
-//     this.deletedtimestamp = new Date().toISOString();
-//     await this.save();
-// }
 const UserModel = mongoose.model("User", userSchema);
 export default UserModel;

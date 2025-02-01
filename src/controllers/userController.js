@@ -1,5 +1,5 @@
 import userModel from "../models/Users.js";
-import { findUserByUserName_WOC, updateUserByUsername_WC } from "../services/userServices.js";
+import { findUser_WOC, updateUser_WC } from "../services/userServices.js";
 
 export async function usersDetails(req, res) {
   try {
@@ -28,11 +28,11 @@ export async function userDetail(req, res) {
 export async function makeAdmin(req, res) {
   try {
     const { username } = req.params;
-    const existingUser = await findUserByUserName_WOC(username);
+    const existingUser = await findUser_WOC(username);
     if (!existingUser) return res.status(404).json({ message: `${username} - no active record found` });
     if (existingUser.role !== 'admin') return res.status(409).json({ status: false });
     if (existingUser.deleted) return res.status(403).json({ message: `${username} - has been banned` });
-    const updatedUser = await updateUserByUsername_WC({ username }, { role: "admin" });
+    const updatedUser = await updateUser_WC({ username }, { role: "admin" });
     if (updatedUser) return res.status(200).json({ message: `user ${username} roled to admin` });
     return res.status(409).json({ status: true });
   } catch (error) {
@@ -46,7 +46,7 @@ export async function userBanstatus(req, res) {
     const { username } = req.params;
     let { switch_status } = req.body;
     switch_status = Boolean(Number(switch_status));
-    const existingUser = await findUserByUserName_WOC(username);
+    const existingUser = await findUser_WOC(username);
     function userCreate(retivedUserdata){
       let userData = {};
       userData["username"] = retivedUserdata['username'];
@@ -59,7 +59,7 @@ export async function userBanstatus(req, res) {
       return res.status(200).json(userDatas);
     };
     if (!existingUser.deleted === switch_status) {
-      updateddUser = await updateUserByUsername_WC({ username, deleted: !switch_status }, { deleted: switch_status, ...(switch_status && { deletedtimestamp: new Date().toISOString() }) });
+      updateddUser = await updateUser_WC({ username, deleted: !switch_status }, { deleted: switch_status, ...(switch_status && { deletedtimestamp: new Date().toISOString() }) });
     }
     if (updateddUser.deleted === switch_status) {
       userCreate(updateddUser);

@@ -14,7 +14,7 @@ router.use(multer().array());
 router.get("",usersDetails); 
 router.post('',userDetail);
 router.post('/admin',makeAdmin);
-router.get("/ban_status/:username",userBanstatus);
+router.get("/ban-status/:username",userBanstatus);
 
 
 export default router;

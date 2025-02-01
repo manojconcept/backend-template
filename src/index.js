@@ -7,34 +7,40 @@ import { fileURLToPath } from 'url';
 import startServer from "./config/startServer.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from './routes/userRoutes.js';
+import userAgent from "./middleware/custome.js";
+
+import { jwtDecoder, jwtVerifier, isJWTExpired,genJwtToken } from "./config/authentication.js";
 
 
 const app = express();
 const PORT = 3300;
 
-// Get __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//middleware used globally;
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-//Routes
 app.use('/auth', authRoutes);
-app.use('/admin',userRoutes);   
+app.use('/admin', userRoutes);
 
-// app.use('/uploads/noimage', express.static(path.join(__dirname, 'images')));
 app.use(express.static(path.join(__dirname, 'src/images')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'images', 'noimageDark.svg'));
 });
 
-// Route to handle dynamic image requests
+app.get('/ua', userAgent, (req, res) => {
+    console.log(req.ip);
+    // console.log(req.uAgent);
+    // console.log(req.uAgent.toAgent(),"browser");
+    // console.log(req.uAgent.os.toString(),"os");
+    res.send({ message: { ...req.uAgent } });
+});
+
 app.get('/:imageName', (req, res) => {
-    const imageName = req.params.imageName; // Get the image name from the URL
+    const imageName = req.params.imageName;
     const imagePath = path.join(__dirname, 'images', imageName);
 
     res.sendFile(imagePath, (err) => {
@@ -43,6 +49,12 @@ app.get('/:imageName', (req, res) => {
         }
     });
 });
+
+
+
+
+console.log(isJWTExpired('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OWU1MTk1ZThmYWQ1MWFiNjhkMzZkOCIsImlhdCI6MTczODQyOTQ3NCwiZXhwIjoxNzM5MDM0Mjc0fQ.1dDyi52Gr3jzlKYja5M--mznHrfmQHQrZfv6RX-nuHk', process.env.REFRESH_TOKEN_SECRET_KEY))
+
 
 startServer(app, PORT);
 
