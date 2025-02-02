@@ -1,5 +1,5 @@
 import sendMail from "../config/email.js";
-import { genJwtToken, jwtVerifier, jwtDecoder, isJWTExpired } from "../config/authentication.js";
+import { genJwtToken, jwtVerifier, jwtDecoder, isJWTInvalid } from "../config/authentication.js";
 import { findUser_WOC } from "../services/userServices.js";
 
 import UserModel from "../models/Users.js";
@@ -75,6 +75,8 @@ export const login = async (req, res) => {
             return res.status(200).json({ message: 'User not verified. Please check your email for verification.' });
         }
         if (!user.deleted) {
+            const maxAge = 7 * 24 * 60 * 60 * 1000;
+            const maxExp = Date.now() + maxAge;
             const isMatch = await existingToken.comparePassword(password);
             if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
             const accessToken = genJwtToken({ id: user._id });
@@ -83,49 +85,103 @@ export const login = async (req, res) => {
                 process.env.REFRESH_TOKEN_SECRET_KEY,
                 process.env.JWT_REFRESH_TOKEN_LIFE
             );
-
-            console.log(isJWTExpired(refreshToken,process.env.REFRESH_TOKEN_SECRET_KEY));
             const updatedTokenDoc = await TokenModel.findByIdAndUpdate(
                 user._id,
                 {
-                    $push: { logins: { accesstoken: accessToken, refreshtoken: refreshToken } }
+                    $push: { logins: { accesstoken: accessToken, refreshtoken: refreshToken, refreshexp: maxExp } }
                 }, {
                 new: true,
                 upsert: true
             }
             );
+            res.cookie('r-token', refreshToken, {
+                httpOnly: true,  // Cookie cannot be accessed via JavaScript
+                secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
+                sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
+                maxAge: maxAge // Cookie expires in 7 days
+            });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
         }
         res.status(200).json({ message: 'Invalid credentials' });
 
     } catch (error) {
-        res.status(500).json({ message: 'Server '+error });
+        res.status(500).json({ message: 'Server ' + error });
     }
 };
 export const refreshToken = async (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(401).json({ message: 'Refresh token required' });
+    const cookieRefreshingToken = req.cookies['r-token'];
+    if (!cookieRefreshingToken) return res.status(401).json({ loginStatus: false,message: 'Refresh token required' });
     try {
-        const decoded = jwtVerifier(token, process.env.REFRESH_TOKEN_SECRET_KEY);
-        const user = await UserModel.findById(decoded.id);
-        if (!user) return res.sendStatus(403).json({ status: false, message: 'Invalid refresh token' });
-        if (user.refreshToken !== token) {
-            return res.status(403).json({ status: false, message: 'Invalid refresh token' });
+        const jwtStatus = isJWTInvalid(cookieRefreshingToken, process.env.REFRESH_TOKEN_SECRET_KEY);
+        const existingUser = await UserModel.findOne({ _id: jwtStatus?.id, isVerified: true, deleted: false });
+        const existingToken = await TokenModel.findOne({ _id: jwtStatus.id, 'logins.refreshtoken': cookieRefreshingToken }, { 'logins.$': 1 })
+        if (!existingUser || jwtStatus?.status) {
+            if (existingToken) {
+                await TokenModel.findByIdAndUpdate(
+                    jwtStatus?.id,
+                    { $pull: { logins: { refreshtoken: cookieRefreshingToken } } }, // Removes the entire object where refreshtoken matches
+                    { new: true } // Return updated document
+                );
+            }
+            res.clearCookie('r-token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict'
+            })
+            return res.status(400).json({ loginStatus: false });
         }
-        const accessToken = genJwtToken({ id: user._id });
 
-        const newRefreshToken = genJwtToken(
-            { id: user._id },
-            process.env.REFRESH_TOKEN_SECRET_KEY,
-            process.env.JWT_REFRESH_TOKEN_LIFE
+        if (!existingToken) {
+            res.clearCookie('r-token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict'
+            })
+            return res.status(400).json({ loginStatus: false });
+        }
+
+
+        const newRefreshToken = genJwtToken({ id: existingUser._id }, process.env.REFRESH_TOKEN_SECRET_KEY, process.env.JWT_REFRESH_TOKEN_LIFE);
+        const newAccessToken = genJwtToken({ id: existingUser._id });
+
+        const maxAge = 7 * 24 * 60 * 60 * 1000;
+        const maxExp = Date.now() + maxAge;
+
+        const updatedToken = await TokenModel.findByIdAndUpdate(
+            jwtStatus?.id,
+            {
+                $set: {
+                    'logins.$[elem].refreshtoken': newRefreshToken,   // Set the new refresh token
+                    'logins.$[elem].accesstoken': newAccessToken,      // Set the new access token
+                    'logins.$[elem].refreshexp': maxExp     // Set the new refresh token expiration date
+                }
+            },
+            {
+                new: true, // Return updated document
+                arrayFilters: [{ 'elem.refreshtoken': cookieRefreshingToken }] // Ensure only the element with the matching refreshtoken is updated
+            }
         );
-        user.refreshToken = newRefreshToken;
-        await user.save();
 
-        res.status(200).json({ status: true, accessToken, refreshToken: newRefreshToken });
+        if (!updatedToken) {
+            res.clearCookie('r-token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict'
+            });
+            return res.status(400).json({ loginStatus: false })
+        };
+
+        res.cookie('r-token', newRefreshToken, {
+            httpOnly: true,  // Cookie cannot be accessed via JavaScript
+            secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
+            sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
+            maxAge: maxAge // Cookie expires in 7 days
+        });
+
+        res.status(200).json({ refreshtoken:newRefreshToken,accesstoken:newAccessToken });
     } catch (error) {
-        res.sendStatus(403).json({ message: 'Invalid or expired refresh token', error });
+        res.status(403).json({ message: 'Invalid or expired refresh token ' + error });
     }
 };
 export const requestPasswordReset = async (req, res) => {

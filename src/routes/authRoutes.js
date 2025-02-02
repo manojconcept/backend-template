@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from "multer";
+
 import userAgent from '../middleware/custome.js';
 
 import {
@@ -19,6 +20,6 @@ router.get('/verify/:token', verifyEmail);
 router.post('/login', login);
 router.post('/request-password-reset', requestPasswordReset);
 router.post('/reset-password', resetPassword);
-router.post('/refresh-token', refreshToken);
+router.get('/refresh-token', refreshToken);
 
 export default router;

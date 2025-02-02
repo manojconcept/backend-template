@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { genHashedPassword, compareHasedPassword } from "../config/authentication.js";
 
 const userSchema = new mongoose.Schema
 (

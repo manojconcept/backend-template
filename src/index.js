@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,8 +11,6 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from './routes/userRoutes.js';
 import userAgent from "./middleware/custome.js";
 
-import { jwtDecoder, jwtVerifier, isJWTExpired,genJwtToken } from "./config/authentication.js";
-
 
 const app = express();
 const PORT = 3300;
@@ -18,9 +18,15 @@ const PORT = 3300;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3300/', // Replace with your frontend URL
+    credentials: true, // Allow cookies to be sent with the request
+  };
+  
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use('/auth', authRoutes);
 app.use('/admin', userRoutes);
@@ -49,11 +55,6 @@ app.get('/:imageName', (req, res) => {
         }
     });
 });
-
-
-
-
-console.log(isJWTExpired('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OWU1MTk1ZThmYWQ1MWFiNjhkMzZkOCIsImlhdCI6MTczODQyOTQ3NCwiZXhwIjoxNzM5MDM0Mjc0fQ.1dDyi52Gr3jzlKYja5M--mznHrfmQHQrZfv6RX-nuHk', process.env.REFRESH_TOKEN_SECRET_KEY))
 
 
 startServer(app, PORT);

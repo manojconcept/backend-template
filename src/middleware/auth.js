@@ -1,21 +1,29 @@
 import { jwtVerifier } from "../config/authentication.js";
 
-export function auth(req, res, next) {
+export default function auth(req, res, next) {
     try {
         const authHeader = req.headers['authorization'];
-        if (!authHeader) {
-            throw new Error("Authorization header not found");
+        if (!authHeader?.startsWith("Bearer ")) {
+            return res.status(401).json({ error: "Unauthorized: Missing or invalid Authorization header" });
         }
-        if (!authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ error: "Authorization header must start with 'Bearer'" });
-        }
-        const token = authHeader.split(' ')[1];
+        const token = authHeader.split(" ")[1];
         if (!token) {
-            throw new Error("Token not found in Authorization header");
+            return res.status(401).json({ error: "Unauthorized: Token missing" });
         }
-        jwtVerifier(token); //which default set to accesstoken
-        next();
-    } catch (e) {
-        res.status(401).send({ message: e.message });
+        try {
+            const decoded = jwtVerifier(token);
+            req.clientUserData = decoded?.id; 
+            next(); 
+        } catch (error) {
+           
+            const errorResponse = {
+                "JsonWebTokenError": { status: 403, message: "Invalid token" },
+                "TokenExpiredError": { status: 401, message: "Access token expired", code: "TOKEN_EXPIRED" },
+            }[error.name] || { status: 500, message: "Internal Server Error" };
+
+            return res.status(errorResponse.status).json({ error: errorResponse.message, code: errorResponse.code });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 }

@@ -25,10 +25,10 @@ export async function compareHasedPassword(pwd, storedPwd) {
         throw error;
     }
 }
-export const genJwtToken = (uniqueObj, SECRET_KEY = ACCESS_TOKEN_SECRET_KEY, expiresIn = JWT_ACCESS_TOKEN_LIFE) => { jwt.sign(uniqueObj, SECRET_KEY, { expiresIn }) };
+export const genJwtToken = (uniqueObj, SECRET_KEY = ACCESS_TOKEN_SECRET_KEY, expiresIn = JWT_ACCESS_TOKEN_LIFE) => jwt.sign(uniqueObj, SECRET_KEY, { expiresIn });
 export const jwtVerifier = (token, SECRET_KEY = ACCESS_TOKEN_SECRET_KEY) => jwt.verify(token, SECRET_KEY);
 export const jwtDecoder = token => jwt.decode(token);
-export function isJWTExpired(token, SECRET_KEY) {
+export function isJWTInvalid(token, SECRET_KEY) {
     try {
         return {
             status: false,
@@ -41,6 +41,6 @@ export function isJWTExpired(token, SECRET_KEY) {
                 ...jwtDecoder(token)
             };
         }
-        return { [e.name]: e.message };
+        return { status:true,[e.name]: e.message };
     }
 }
