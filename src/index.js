@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const corsOptions = {
-    origin: 'http://localhost:3300/', // Replace with your frontend URL
+    origin: 'http://localhost:3300', // Replace with your frontend URL
     credentials: true, // Allow cookies to be sent with the request
   };
   
@@ -55,6 +55,7 @@ app.get('/:imageName', (req, res) => {
         }
     });
 });
+
 
 
 startServer(app, PORT);

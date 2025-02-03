@@ -34,7 +34,7 @@ export function isJWTInvalid(token, SECRET_KEY) {
             status: false,
             ...jwtVerifier(token, SECRET_KEY)
         };
-    } catch (e) {
+    } catch (e) {   
         if (e.name === "TokenExpiredError") {
             return {
                 status: true,

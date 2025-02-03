@@ -18,8 +18,8 @@ router.use(multer().array());
 router.post('/signup',userAgent,signup);
 router.get('/verify/:token', verifyEmail);
 router.post('/login', login);
-router.post('/request-password-reset', requestPasswordReset);
-router.post('/reset-password', resetPassword);
+router.post('/request-password-reset', requestPasswordReset); // pending...
+router.post('/reset-password', resetPassword); // pending...
 router.get('/refresh-token', refreshToken);
 
 export default router;
