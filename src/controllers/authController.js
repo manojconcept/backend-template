@@ -25,7 +25,7 @@ export const signup = async (req, res) => {
             text: `Please verify your email by clicking this link: ${verificationUrl}`
         })
 
-        res.status(201).json({ message: 'User created successfully, please verify your email.' });
+        res.status(201).json({ status:true,message: 'User created successfully, please verify your email.' });
     } catch (error) {
         res.status(500).json({ message: `server ${error}` });
     }
@@ -205,19 +205,20 @@ export const requestPasswordReset = async (req, res) => {
 };
 export const verifyPasswordReset = async () => {
     try {
-        res.clearCookie('r-token', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'Strict'
-        });
+        const cookieRefreshingToken = req.cookies['r-token'];
+        if (cookieRefreshingToken) {
+            res.clearCookie('r-token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict'
+            });
+        }
         const { token } = req.params;
         const { newPwd } = req.body;
         const jwtStatus = isJWTInvalid(token, ACCESS_TOKEN_SECRET_KEY);
-        if (jwtStatus?.status) return res.status(400).json({ message: 'Invalid User or Invalid Token or expired refresh token ' });
         const existingUser = await UserModel.findOne({ _id: jwtStatus?.id, isVerified: true, deleted: false });
-        if (!existingUser) return res.status(400).json({ message: 'Invalid User or Invalid Token or expired refresh token ' });
         const existingToken = await TokenModel.findById(jwtStatus?.id);
-        if (!existingToken) return res.status(400).json({ message: 'Invalid User or Invalid Token or expired refresh token ' });
+        if (jwtStatus?.status || !existingUser || !existingToken) return res.status(400).json({ message: 'Invalid User or Invalid Token or expired refresh token ' });
         await TokenModel.findByIdAndUpdate(
             jwtStatus?.id,
             { $set: { password: newPwd } },
@@ -244,8 +245,8 @@ export const resetPassword = async (req, res) => {
             if (existingToken) {
                 await TokenModel.findByIdAndUpdate(
                     jwtStatus?.id,
-                    { $pull: { logins: { refreshtoken: cookieRefreshingToken } } }, // Removes the entire object where refreshtoken matches
-                    { new: true } // Return updated document
+                    { $pull: { logins: { refreshtoken: cookieRefreshingToken } } }, 
+                    { new: true } 
                 );
             }
             res.clearCookie('r-token', {
@@ -289,8 +290,8 @@ export const logOut = async (req, res) => {
         if (existingToken) {
             await TokenModel.findByIdAndUpdate(
                 jwtStatus?.id,
-                { $pull: { logins: { refreshtoken: cookieRefreshingToken } } }, // Removes the entire object where refreshtoken matches
-                { new: true } // Return updated document
+                { $pull: { logins: { refreshtoken: cookieRefreshingToken } } },
+                { new: true } 
             );
 
             res.clearCookie('r-token', {

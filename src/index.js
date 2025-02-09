@@ -39,9 +39,6 @@ app.get('/', (req, res) => {
 
 app.get('/ua', userAgent, (req, res) => {
     console.log(req.ip);
-    // console.log(req.uAgent);
-    // console.log(req.uAgent.toAgent(),"browser");
-    // console.log(req.uAgent.os.toString(),"os");
     res.send({ message: { ...req.uAgent } });
 });
 
