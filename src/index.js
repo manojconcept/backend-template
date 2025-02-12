@@ -19,11 +19,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const corsOptions = {
-    origin: 'http://localhost:3300', // Replace with your frontend URL
+    origin: 'https://admin-panal-j2mxgye1b-manojconcepts-projects.vercel.app/', // Replace with your frontend URL
     credentials: true, // Allow cookies to be sent with the request
   };
   
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
