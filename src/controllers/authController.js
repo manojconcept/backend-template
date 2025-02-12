@@ -96,10 +96,10 @@ export const login = async (req, res) => {
             );
             res.cookie('k-token', refreshToken, {
                 path: '/',
-                httpOnly: true,  // Cookie cannot be accessed via JavaScript
+                httpOnly: false,  // Cookie cannot be accessed via JavaScript
                 // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
-                secure:true,
-                sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
+                secure:false,
+                sameSite: 'None',  // Prevents cross-site request forgery (CSRF)
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, // Cookie expires in 7 days
                 partitioned: true, // Add 'Partitioned' (this depends on library support)
                 // expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
