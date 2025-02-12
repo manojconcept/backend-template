@@ -25,7 +25,7 @@ export const signup = async (req, res) => {
             text: `Please verify your email by clicking this link: ${verificationUrl}`
         })
 
-        res.status(201).json({ status:true,message: 'User created successfully, please verify your email.' });
+        res.status(201).json({ status: true, message: 'User created successfully, please verify your email.' });
     } catch (error) {
         res.status(500).json({ message: `server ${error}` });
     }
@@ -95,6 +95,7 @@ export const login = async (req, res) => {
             }
             );
             res.cookie('r-token', refreshToken, {
+                path: '/',
                 httpOnly: true,  // Cookie cannot be accessed via JavaScript
                 secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
                 sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
@@ -245,8 +246,8 @@ export const resetPassword = async (req, res) => {
             if (existingToken) {
                 await TokenModel.findByIdAndUpdate(
                     jwtStatus?.id,
-                    { $pull: { logins: { refreshtoken: cookieRefreshingToken } } }, 
-                    { new: true } 
+                    { $pull: { logins: { refreshtoken: cookieRefreshingToken } } },
+                    { new: true }
                 );
             }
             res.clearCookie('r-token', {
@@ -291,7 +292,7 @@ export const logOut = async (req, res) => {
             await TokenModel.findByIdAndUpdate(
                 jwtStatus?.id,
                 { $pull: { logins: { refreshtoken: cookieRefreshingToken } } },
-                { new: true } 
+                { new: true }
             );
 
             res.clearCookie('r-token', {
