@@ -94,7 +94,7 @@ export const login = async (req, res) => {
                 upsert: true
             }
             );
-            res.cookie('r-koken', refreshToken, {
+            res.cookie('r-token', refreshToken, {
                 path: '/',
                 httpOnly: true,  // Cookie cannot be accessed via JavaScript
                 // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
