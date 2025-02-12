@@ -9,7 +9,8 @@ import {
     login,
     requestPasswordReset,
     resetPassword,
-    refreshToken
+    refreshToken,
+    verifyPasswordReset
 } from '../controllers/authController.js';
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.post('/login', login);
 router.post('/request-password-reset', requestPasswordReset); // pending...
 router.post('/reset-password', resetPassword); // pending...
 router.get('/refresh-token', refreshToken);
+router.get('/getcookie',verifyPasswordReset);
 
 export default router;

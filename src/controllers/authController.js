@@ -210,28 +210,28 @@ export const requestPasswordReset = async (req, res) => {
 export const verifyPasswordReset = async () => {
     try {
         const cookieRefreshingToken = req.cookies['r-token'];
-        if (cookieRefreshingToken) {
-            res.clearCookie('r-token', {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'Strict'
-            });
-        }
-        const { token } = req.params;
-        const { newPwd } = req.body;
-        const jwtStatus = isJWTInvalid(token, ACCESS_TOKEN_SECRET_KEY);
-        const existingUser = await UserModel.findOne({ _id: jwtStatus?.id, isVerified: true, deleted: false });
-        const existingToken = await TokenModel.findById(jwtStatus?.id);
-        if (jwtStatus?.status || !existingUser || !existingToken) return res.status(400).json({ message: 'Invalid User or Invalid Token or expired refresh token ' });
-        await TokenModel.findByIdAndUpdate(
-            jwtStatus?.id,
-            { $set: { password: newPwd } },
-            { new: true }
-        );
-        existingToken.logins = [];
-        existingToken.resettoken = undefined;
-        await existingToken.save();
-        res.status(200).json({ message: 'Password changed successfully' });
+        // if (cookieRefreshingToken) {
+        //     res.clearCookie('r-token', {
+        //         httpOnly: true,
+        //         secure: true,
+        //         sameSite: 'Strict'
+        //     });
+        // }
+        // const { token } = req.params;
+        // const { newPwd } = req.body;
+        // const jwtStatus = isJWTInvalid(token, ACCESS_TOKEN_SECRET_KEY);
+        // const existingUser = await UserModel.findOne({ _id: jwtStatus?.id, isVerified: true, deleted: false });
+        // const existingToken = await TokenModel.findById(jwtStatus?.id);
+        // if (jwtStatus?.status || !existingUser || !existingToken) return res.status(400).json({ message: 'Invalid User or Invalid Token or expired refresh token ' });
+        // await TokenModel.findByIdAndUpdate(
+        //     jwtStatus?.id,
+        //     { $set: { password: newPwd } },
+        //     { new: true }
+        // );
+        // existingToken.logins = [];
+        // existingToken.resettoken = undefined;
+        // await existingToken.save();
+        res.status(200).json({ message: cookieRefreshingToken });
     } catch (e) {
         res.status(500).json({ message: 'Server error' });
 
