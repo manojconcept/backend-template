@@ -100,9 +100,9 @@ export const login = async (req, res) => {
                 // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
                 secure:true,
                 sameSite: 'None',  // Prevents cross-site request forgery (CSRF)
-                maxAge: maxAge, // Cookie expires in 7 days
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, // Cookie expires in 7 days
                 partitioned: true, // Add 'Partitioned' (this depends on library support)
-                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                // expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
