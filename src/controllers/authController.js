@@ -94,6 +94,7 @@ export const login = async (req, res) => {
                 upsert: true
             }
             );
+            res.header("Set-Cookie", `r-token="${refreshToken}"; Path=/; HttpOnly; Secure; SameSite=None;`);
             res.cookie('r-token', refreshToken, {
                 path: '/',
                 httpOnly: true,  // Cookie cannot be accessed via JavaScript
