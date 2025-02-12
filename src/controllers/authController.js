@@ -100,8 +100,8 @@ export const login = async (req, res) => {
                 httpOnly: true,  // Cookie cannot be accessed via JavaScript
                 // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
                 secure:true,
-                sameSite: 'Lax',  // Prevents cross-site request forgery (CSRF)
-                maxAge: maxAge // Cookie expires in 7 days
+                sameSite: 'None',  // Prevents cross-site request forgery (CSRF)
+                maxAge: 7 * 24 * 60 * 60 * 1000 // Cookie expires in 7 days
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
