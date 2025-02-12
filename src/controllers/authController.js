@@ -96,7 +96,7 @@ export const login = async (req, res) => {
             );
             res.cookie('r-token', refreshToken, {
                 path: '/',
-                // httpOnly: true,  // Cookie cannot be accessed via JavaScript
+                httpOnly: true,  // Cookie cannot be accessed via JavaScript
                 // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
                 secure:true,
                 sameSite: 'None',  // Prevents cross-site request forgery (CSRF)
