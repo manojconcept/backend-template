@@ -102,7 +102,7 @@ export const login = async (req, res) => {
                 sameSite: 'None',  // Prevents cross-site request forgery (CSRF)
                 maxAge: maxAge, // Cookie expires in 7 days
                 partitioned: true, // Add 'Partitioned' (this depends on library support)
-                // expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
