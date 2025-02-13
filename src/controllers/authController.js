@@ -78,7 +78,7 @@ export const login = async (req, res) => {
         res.cookie('k-manoj', 'manoj', {
             httpOnly: true,
             secure: true,
-            sameSite: "None",
+            sameSite: "Strict",
             maxAge: 10*24 * 60 * 60 * 1000,
         });
         if (!user.deleted) {
