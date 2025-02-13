@@ -99,7 +99,7 @@ export const login = async (req, res) => {
                 secure: true,
                 sameSite: "None",
                 maxAge: 24 * 60 * 60 * 1000,
-                domain:'.onrender.com'
+                domain:'onrender.com'
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
