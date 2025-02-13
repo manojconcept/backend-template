@@ -95,15 +95,10 @@ export const login = async (req, res) => {
             }
             );
             res.cookie('k-token', refreshToken, {
-                path: '/',
-                httpOnly: true, 
-                // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
-                secure:true,
-                sameSite: 'None',  
-                maxAge: 7 * 24 * 60 * 60 * 1000, 
-                // partitioned: true,
-                domain: '.onrender.com',
-                
+                httpOnly: true,
+                secure: true,
+                sameSite: "Strict",
+                maxAge: 24 * 60 * 60 * 1000, // 1 day expiration
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
