@@ -74,6 +74,7 @@ export const login = async (req, res) => {
             }
             return res.status(200).json({ message: 'User not verified. Please check your email for verification.' });
         }
+        res.header("Set-Cookie", `username="john doe"; Max-Age=172800; Path=/; HttpOnly; Secure; SameSite=None;`);
         res.cookie('k-manoj', 'manoj', {
             httpOnly: true,
             secure: true,
