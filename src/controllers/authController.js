@@ -98,7 +98,7 @@ export const login = async (req, res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: "None",
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: 10*24 * 60 * 60 * 1000,
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
