@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const corsOptions = {
-    origin: 'https://admin-panal-b6ol.onrender.com', 
+    origin: 'admin-panal-gxk7db4kt-manojconcepts-projects.vercel.app', 
     credentials: true, 
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
