@@ -100,6 +100,7 @@ export const login = async (req, res) => {
                 // sameSite: "Strict",
                 sameSite: "None",
                 maxAge: 24 * 60 * 60 * 1000, // 1 day expiration
+                Partitioned:true
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
