@@ -97,7 +97,8 @@ export const login = async (req, res) => {
             res.cookie('k-token', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "Strict",
+                // sameSite: "Strict",
+                sameSite: "None",
                 maxAge: 24 * 60 * 60 * 1000, // 1 day expiration
             });
             await user.save()
