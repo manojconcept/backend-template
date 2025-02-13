@@ -96,9 +96,9 @@ export const login = async (req, res) => {
             );
             res.cookie('k-token', refreshToken, {
                 path: '/',
-                httpOnly: false, 
+                httpOnly: true, 
                 // secure: process.env.NODE_ENV === 'production',  // Only send over HTTPS in production
-                secure:false,
+                secure:true,
                 sameSite: 'None',  
                 maxAge: 7 * 24 * 60 * 60 * 1000, 
                 partitioned: true,
