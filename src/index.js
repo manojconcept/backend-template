@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const corsOptions = {
-    origin: 'admin-panal-gxk7db4kt-manojconcepts-projects.vercel.app', 
+    origin: 'https://admin-panal-manoj-checking.vercel.app/', 
     credentials: true, 
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
