@@ -97,9 +97,8 @@ export const login = async (req, res) => {
             res.cookie('k-token', refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "None",
+                sameSite: "Lex",
                 maxAge: 24 * 60 * 60 * 1000,
-                domain:'onrender.com'
             });
             await user.save()
             return res.status(200).json({ accessToken, refreshToken });
