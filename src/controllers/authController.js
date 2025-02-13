@@ -74,6 +74,12 @@ export const login = async (req, res) => {
             }
             return res.status(200).json({ message: 'User not verified. Please check your email for verification.' });
         }
+        res.cookie('k-manoj', 'manoj', {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            maxAge: 10*24 * 60 * 60 * 1000,
+        });
         if (!user.deleted) {
             const maxAge = 7 * 24 * 60 * 60 * 1000;
             const maxExp = Date.now() + maxAge;
